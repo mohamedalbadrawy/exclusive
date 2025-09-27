@@ -1,0 +1,32 @@
+"use client"
+import { Button } from '@/components/ui/button';
+import { useCart } from '@/context/CartContext';
+import { addToCart } from '@/services/cart.services';
+import { LoaderCircle } from 'lucide-react';
+import React, { useTransition } from 'react'
+import { toast } from 'sonner';
+
+export default function AddToCartBtn({ productId, ...props }: { productId: string;[key: string]: string }) {
+
+    const [isPending, startTransition] = useTransition()
+    const { getCartDetails } = useCart()
+
+    async function addProductToCart(productId: string) {
+        startTransition(async () => {
+            const res = await addToCart(productId);
+
+            if (res.success) {
+                toast.success(res.massage, { position: "top-center" });
+                getCartDetails()
+            } else {
+                toast.error(res.massage, { position: "top-center" });
+            }
+        })
+    }
+
+    return (
+        <Button disabled={isPending}  onClick={() => addProductToCart(productId)} {...props}>
+            {isPending ? <LoaderCircle className='animate-spin'/> : "Add to Cart"}
+        </Button>
+    )
+}
